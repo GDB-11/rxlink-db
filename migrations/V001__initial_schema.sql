@@ -156,7 +156,6 @@ CREATE TABLE "User" (
 
 CREATE TABLE "RefreshToken" (
     "RefreshTokenId"   SERIAL      PRIMARY KEY,
-    "RefreshTokenCode" UUID        NOT NULL DEFAULT uuidv7() UNIQUE,
     "UserId"           INTEGER     NOT NULL REFERENCES "User" ("UserId"),
     "TokenHash"        TEXT        NOT NULL,
     "ExpiresAt"        TIMESTAMPTZ NOT NULL,
