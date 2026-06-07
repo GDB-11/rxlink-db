@@ -372,7 +372,8 @@ INSERT INTO "PrescriptionStatus" ("Name", "Description") VALUES
     ('Suspendido', 'Suspendido temporalmente por el médico prescriptor'),
     ('Finalizado', 'Finalización del tratamiento'),
     ('Dispensado', 'Se le han entregado los medicamentos al paciente'),
-    ('Caducado',   'La receta caducó sin que se dispensara el medicamento');
+    ('Caducado',   'La receta caducó sin que se dispensara el medicamento'),
+    ('Cancelado',   'Receta totalmente cancelada por el doctor; no es clínicamente válida');
 
 INSERT INTO "AdministrationRoute" ("Name") VALUES
     ('Oral'), ('Intravenosa'), ('Intramuscular'), ('Subcutánea'),
