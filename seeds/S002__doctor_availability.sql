@@ -1,5 +1,6 @@
 -- =============================================================================
--- V015: DoctorAvailability — all new doctors (DoctorId 8–153), 10 schedule templates
+-- SYNTHETIC DEMO DATA ONLY. Never apply to a database with real patients (see rxlink-db/README.md).
+-- S002 (was V015): DoctorAvailability — all new doctors (DoctorId 8–153), 10 schedule templates
 -- Date range 2026-06-22 → 2026-09-22  |  all 7 days  |  6–7 slots/day per template
 -- =============================================================================
 

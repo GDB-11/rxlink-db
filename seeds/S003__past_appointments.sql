@@ -1,5 +1,7 @@
+-- SYNTHETIC DEMO DATA ONLY. Never apply to a database with real patients.
+-- Medication ids below are the fixed C006 catalog ids; codes are c0de0009-…-<id>.
 -- =============================================================================
--- V016: Past appointments with diagnostics and prescriptions
+-- S003 (was V016): Past appointments with diagnostics and prescriptions
 -- 5 patients × 3-4 completed appointments each, with diagnostics and prescriptions
 --
 -- Patients:
@@ -14,19 +16,6 @@
 --   17=Losartán 50mg   15=Omeprazol 20mg    43=Amlodipino 5mg      42=Paracetamol 500mg
 --   58=Fluoxetina 20mg 83=Alprazolam 0.5mg  57=Clonazepam 2mg
 -- =============================================================================
-
--- ---------------------------------------------------------------------------
--- 1. New medications (auto-increment — do not override sequence)
---    Referenced by name in PrescriptionDetail via scalar subqueries
--- ---------------------------------------------------------------------------
-
-INSERT INTO "Medication"
-    ("PharmaceuticalFormId","AdministrationRouteId","GenericName","CommercialName","Concentration")
-VALUES
-    (1,1,'Metoprolol',   'Lopressor',  '50 mg'),
-    (1,1,'Sumatriptán',  'Imigran',    '50 mg'),
-    (1,1,'Levotiroxina', 'Eutirox',    '50 mcg'),
-    (1,1,'Zolpidem',     'Stilnox',    '10 mg');
 
 -- ---------------------------------------------------------------------------
 -- 2. DoctorAvailability — past slots (all IsBooked = TRUE)
@@ -229,113 +218,197 @@ VALUES
       '2026-06-07','2026-05-08 15:30:00-05',95,'2026-05-09 12:00:00-05',1,95,'2026-05-08 14:30:00-05');
 
 -- ---------------------------------------------------------------------------
--- 6. PrescriptionDetails
+-- 6. PrescriptionDetails (the API snapshots names at write time; SQL seeds bypass it, so they are inline)
 --    PrescriptionId resolved via AppointmentId (JOIN through Diagnostic)
 --    New medication IDs resolved via scalar subquery (unambiguous names)
 -- ---------------------------------------------------------------------------
 
 INSERT INTO "PrescriptionDetail"
-    ("PrescriptionId","MedicationId","AdministrationRouteId","FrequencyId","Dose","DurationDays","Instructions")
+    ("PrescriptionId","Dose","DurationDays","Instructions","MedicationCode","AdministrationRouteCode","FrequencyCode",
+     "MedicationGenericName","MedicationCommercialName","MedicationConcentration",
+     "PharmaceuticalFormName","AdministrationRouteName","FrequencyDescription","FrequencyIntervalHours")
 VALUES
     -- Rx for Appt 29 (HTA inicial): Enalapril(40) + Metformina(33)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=29),
-     40,1,1,'10 mg',   30,'Tomar en la mañana, con o sin alimentos.'),
+     '10 mg',30,'Tomar en la mañana, con o sin alimentos.',
+     'c0de0009-0000-4000-8000-000000000040','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Enalapril','Renitec','10 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=29),
-     33,1,2,'850 mg',  30,'Tomar con el desayuno y la cena.'),
+     '850 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000033','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metformina','Glucophage','850 mg','Tableta','Oral','Dos veces al día',12),
     -- Rx for Appt 30 (HTA + DM2 + dislipidemia): Enalapril(40) + Metformina(33) + Atorvastatina 20mg(74)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=30),
-     40,1,1,'10 mg',   30,'Tomar en la mañana.'),
+     '10 mg',30,'Tomar en la mañana.',
+     'c0de0009-0000-4000-8000-000000000040','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Enalapril','Renitec','10 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=30),
-     33,1,2,'850 mg',  30,'Tomar con el desayuno y la cena.'),
+     '850 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000033','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metformina','Glucophage','850 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=30),
-     74,1,1,'20 mg',   30,'Tomar por la noche.'),
+     '20 mg',30,'Tomar por la noche.',
+     'c0de0009-0000-4000-8000-000000000074','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Atorvastatina','Lipitor','20 mg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 31 (ajuste antihipertensivo): Losartán(17) + Metformina(33)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=31),
-     17,1,1,'50 mg',   30,'Tomar en la mañana.'),
+     '50 mg',30,'Tomar en la mañana.',
+     'c0de0009-0000-4000-8000-000000000017','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Losartán','Cozaar','50 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=31),
-     33,1,2,'850 mg',  30,'Tomar con el desayuno y la cena.'),
+     '850 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000033','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metformina','Glucophage','850 mg','Tableta','Oral','Dos veces al día',12),
     -- Rx for Appt 32 (mantenimiento + gastroprotección): Losartán(17) + Metformina(33) + Omeprazol(15)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=32),
-     17,1,1,'50 mg',   30,'Tomar en la mañana.'),
+     '50 mg',30,'Tomar en la mañana.',
+     'c0de0009-0000-4000-8000-000000000017','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Losartán','Cozaar','50 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=32),
-     33,1,2,'850 mg',  30,'Tomar con el desayuno y la cena.'),
+     '850 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000033','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metformina','Glucophage','850 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=32),
-     15,1,1,'20 mg',   30,'Tomar en ayunas 30 min antes del desayuno.'),
+     '20 mg',30,'Tomar en ayunas 30 min antes del desayuno.',
+     'c0de0009-0000-4000-8000-000000000015','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Omeprazol','Losec','20 mg','Cápsula','Oral','Una vez al día',24),
     -- Rx for Appt 33 (triple CV inicio): Metoprolol(subq) + Atorvastatina 20mg(74) + Amlodipino(43)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=33),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Metoprolol'  AND "Concentration"='50 mg'),1,2,'50 mg',30,'Tomar con el desayuno y la cena.'),
+     '50 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000084','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metoprolol','Lopressor','50 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=33),
-     74,1,1,'20 mg',   30,'Tomar por la noche.'),
+     '20 mg',30,'Tomar por la noche.',
+     'c0de0009-0000-4000-8000-000000000074','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Atorvastatina','Lipitor','20 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=33),
-     43,1,1,'5 mg',    30,'Tomar en la mañana.'),
+     '5 mg',30,'Tomar en la mañana.',
+     'c0de0009-0000-4000-8000-000000000043','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Amlodipino','Norvasc','5 mg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 34 (triple CV, estatina escalada): Metoprolol(subq) + Atorvastatina 40mg(41) + Amlodipino(43)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=34),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Metoprolol'  AND "Concentration"='50 mg'),1,2,'50 mg',30,'Tomar con el desayuno y la cena.'),
+     '50 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000084','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metoprolol','Lopressor','50 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=34),
-     41,1,1,'40 mg',   30,'Tomar por la noche. Dosis escalada.'),
+     '40 mg',30,'Tomar por la noche. Dosis escalada.',
+     'c0de0009-0000-4000-8000-000000000041','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Atorvastatina','Lipitor','40 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=34),
-     43,1,1,'5 mg',    30,'Tomar en la mañana.'),
+     '5 mg',30,'Tomar en la mañana.',
+     'c0de0009-0000-4000-8000-000000000043','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Amlodipino','Norvasc','5 mg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 35 (triple CV + ARB): Metoprolol(subq) + Atorvastatina 40mg(41) + Losartán(17)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=35),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Metoprolol'  AND "Concentration"='50 mg'),1,2,'50 mg',30,'Tomar con el desayuno y la cena.'),
+     '50 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000084','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metoprolol','Lopressor','50 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=35),
-     41,1,1,'40 mg',   30,'Tomar por la noche.'),
+     '40 mg',30,'Tomar por la noche.',
+     'c0de0009-0000-4000-8000-000000000041','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Atorvastatina','Lipitor','40 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=35),
-     17,1,1,'50 mg',   30,'Tomar en la mañana.'),
+     '50 mg',30,'Tomar en la mañana.',
+     'c0de0009-0000-4000-8000-000000000017','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Losartán','Cozaar','50 mg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 36 (migraña rescate): Paracetamol(42) + Sumatriptán(subq)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=36),
-     42,1,3,'500-1000 mg',7,'Tomar al inicio del episodio; máximo 4 g/día.'),
+     '500-1000 mg',7,'Tomar al inicio del episodio; máximo 4 g/día.',
+     'c0de0009-0000-4000-8000-000000000042','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000003',
+     'Paracetamol','Panadol','500 mg','Tableta','Oral','Cada 8 horas',8),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=36),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Sumatriptán' AND "Concentration"='50 mg'),1,1,'50 mg',7,'Tomar 1 tableta al inicio del aura o cefalea; repetir a las 2 h si persiste; máximo 2 tabletas/día.'),
+     '50 mg',7,'Tomar 1 tableta al inicio del aura o cefalea; repetir a las 2 h si persiste; máximo 2 tabletas/día.',
+     'c0de0009-0000-4000-8000-000000000085','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Sumatriptán','Imigran','50 mg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 37 (migraña + depresión): Paracetamol(42) + Sumatriptán(subq) + Fluoxetina(58)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=37),
-     42,1,3,'500-1000 mg',7,'Tomar al inicio del episodio; máximo 4 g/día.'),
+     '500-1000 mg',7,'Tomar al inicio del episodio; máximo 4 g/día.',
+     'c0de0009-0000-4000-8000-000000000042','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000003',
+     'Paracetamol','Panadol','500 mg','Tableta','Oral','Cada 8 horas',8),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=37),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Sumatriptán' AND "Concentration"='50 mg'),1,1,'50 mg',7,'Tomar al inicio del episodio agudo de migraña.'),
+     '50 mg',7,'Tomar al inicio del episodio agudo de migraña.',
+     'c0de0009-0000-4000-8000-000000000085','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Sumatriptán','Imigran','50 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=37),
-     58,1,1,'20 mg',   30,'Tomar por la mañana. Efecto esperado en 2-4 semanas.'),
+     '20 mg',30,'Tomar por la mañana. Efecto esperado en 2-4 semanas.',
+     'c0de0009-0000-4000-8000-000000000058','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Fluoxetina','Prozac','20 mg','Cápsula','Oral','Una vez al día',24),
     -- Rx for Appt 38 (mantenimiento migraña + depresión): Sumatriptán(subq) + Fluoxetina(58)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=38),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Sumatriptán' AND "Concentration"='50 mg'),1,1,'50 mg',30,'Rescate ante episodio de migraña; máximo 2 tabletas/día.'),
+     '50 mg',30,'Rescate ante episodio de migraña; máximo 2 tabletas/día.',
+     'c0de0009-0000-4000-8000-000000000085','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Sumatriptán','Imigran','50 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=38),
-     58,1,1,'20 mg',   30,'Tomar por la mañana. Continuar tratamiento.'),
+     '20 mg',30,'Tomar por la mañana. Continuar tratamiento.',
+     'c0de0009-0000-4000-8000-000000000058','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Fluoxetina','Prozac','20 mg','Cápsula','Oral','Una vez al día',24),
     -- Rx for Appt 39 (mantenimiento): Sumatriptán(subq) + Fluoxetina(58)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=39),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Sumatriptán' AND "Concentration"='50 mg'),1,1,'50 mg',30,'Rescate ante episodio de migraña.'),
+     '50 mg',30,'Rescate ante episodio de migraña.',
+     'c0de0009-0000-4000-8000-000000000085','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Sumatriptán','Imigran','50 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=39),
-     58,1,1,'20 mg',   30,'Mantener 6 meses adicionales.'),
+     '20 mg',30,'Mantener 6 meses adicionales.',
+     'c0de0009-0000-4000-8000-000000000058','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Fluoxetina','Prozac','20 mg','Cápsula','Oral','Una vez al día',24),
     -- Rx for Appt 40 (hipotiroidismo inicial): Levotiroxina(subq)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=40),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Levotiroxina' AND "Concentration"='50 mcg'),1,1,'50 mcg',30,'Tomar en ayunas 30-60 min antes del desayuno.'),
+     '50 mcg',30,'Tomar en ayunas 30-60 min antes del desayuno.',
+     'c0de0009-0000-4000-8000-000000000086','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Levotiroxina','Eutirox','50 mcg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 41 (hipotiroidismo + DM2): Levotiroxina(subq) + Metformina(33)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=41),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Levotiroxina' AND "Concentration"='50 mcg'),1,1,'50 mcg',30,'Tomar en ayunas 30-60 min antes del desayuno.'),
+     '50 mcg',30,'Tomar en ayunas 30-60 min antes del desayuno.',
+     'c0de0009-0000-4000-8000-000000000086','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Levotiroxina','Eutirox','50 mcg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=41),
-     33,1,2,'850 mg',  30,'Tomar con el desayuno y la cena.'),
+     '850 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000033','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metformina','Glucophage','850 mg','Tableta','Oral','Dos veces al día',12),
     -- Rx for Appt 42 (mantenimiento + gastroprotección): Levotiroxina(subq) + Metformina(33) + Omeprazol(15)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=42),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Levotiroxina' AND "Concentration"='50 mcg'),1,1,'50 mcg',30,'Tomar en ayunas 30-60 min antes del desayuno.'),
+     '50 mcg',30,'Tomar en ayunas 30-60 min antes del desayuno.',
+     'c0de0009-0000-4000-8000-000000000086','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Levotiroxina','Eutirox','50 mcg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=42),
-     33,1,2,'850 mg',  30,'Tomar con el desayuno y la cena.'),
+     '850 mg',30,'Tomar con el desayuno y la cena.',
+     'c0de0009-0000-4000-8000-000000000033','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Metformina','Glucophage','850 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=42),
-     15,1,1,'20 mg',   30,'Tomar en ayunas 30 min antes del desayuno.'),
+     '20 mg',30,'Tomar en ayunas 30 min antes del desayuno.',
+     'c0de0009-0000-4000-8000-000000000015','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Omeprazol','Losec','20 mg','Cápsula','Oral','Una vez al día',24),
     -- Rx for Appt 43 (TAG + insomnio inicial): Alprazolam(83) + Zolpidem(subq)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=43),
-     83,1,2,'0.5 mg',  30,'Tomar una tableta en la mañana y otra por la noche según ansiedad.'),
+     '0.5 mg',30,'Tomar una tableta en la mañana y otra por la noche según ansiedad.',
+     'c0de0009-0000-4000-8000-000000000083','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Alprazolam','Xanax','0.5 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=43),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Zolpidem'    AND "Concentration"='10 mg'),1,1,'10 mg',30,'Tomar 30 min antes de acostarse. Usar máximo 4 semanas.'),
+     '10 mg',30,'Tomar 30 min antes de acostarse. Usar máximo 4 semanas.',
+     'c0de0009-0000-4000-8000-000000000087','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Zolpidem','Stilnox','10 mg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 44 (ajuste TAG): Alprazolam(83) + Clonazepam 2mg(57) + Zolpidem(subq)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=44),
-     83,1,2,'0.5 mg',  30,'Reducir a una toma diaria matutina.'),
+     '0.5 mg',30,'Reducir a una toma diaria matutina.',
+     'c0de0009-0000-4000-8000-000000000083','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Alprazolam','Xanax','0.5 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=44),
-     57,1,1,'1 mg (½ tableta)',30,'Tomar al acostarse para ansiedad nocturna e insomnio.'),
+     '1 mg (½ tableta)',30,'Tomar al acostarse para ansiedad nocturna e insomnio.',
+     'c0de0009-0000-4000-8000-000000000057','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Clonazepam','Rivotril','2 mg','Tableta','Oral','Una vez al día',24),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=44),
-     (SELECT "MedicationId" FROM "Medication" WHERE "GenericName"='Zolpidem'    AND "Concentration"='10 mg'),1,1,'5 mg (½ tableta)',30,'Reducir dosis; suspender si clonazepam nocturno es suficiente.'),
+     '5 mg (½ tableta)',30,'Reducir dosis; suspender si clonazepam nocturno es suficiente.',
+     'c0de0009-0000-4000-8000-000000000087','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Zolpidem','Stilnox','10 mg','Tableta','Oral','Una vez al día',24),
     -- Rx for Appt 45 (tapering alprazolam): Alprazolam(83, dosis reducida) + Clonazepam 2mg(57)
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=45),
-     83,1,2,'0.25 mg (½ tableta)',30,'Reducir 0.25 mg cada 2 semanas según plan de tapering.'),
+     '0.25 mg (½ tableta)',30,'Reducir 0.25 mg cada 2 semanas según plan de tapering.',
+     'c0de0009-0000-4000-8000-000000000083','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000002',
+     'Alprazolam','Xanax','0.5 mg','Tableta','Oral','Dos veces al día',12),
     ((SELECT p."PrescriptionId" FROM "Prescription" p JOIN "Diagnostic" d ON p."DiagnosticId"=d."DiagnosticId" WHERE d."AppointmentId"=45),
-     57,1,1,'1 mg (½ tableta)',30,'Tomar al acostarse. Mantener durante tapering de alprazolam.');
+     '1 mg (½ tableta)',30,'Tomar al acostarse. Mantener durante tapering de alprazolam.',
+     'c0de0009-0000-4000-8000-000000000057','c0de0005-0000-4000-8000-000000000001','c0de0006-0000-4000-8000-000000000001',
+     'Clonazepam','Rivotril','2 mg','Tableta','Oral','Una vez al día',24);
 
 -- ---------------------------------------------------------------------------
 -- Sequence corrections
