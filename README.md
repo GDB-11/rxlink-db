@@ -13,6 +13,7 @@ The former `V001`–`V041` chain lives only in git history under the tag **`pre-
 | `V002__baseline_reference_data.sql` | Roles, prescription/appointment/diagnostic statuses, consultation types, default clinic, `PartnerConfig` |
 | `V003__baseline_navigation.sql` | Navigation modules, items and role access (final state) |
 | `V004__baseline_audit_triggers.sql` | `trg_audit` attachments (last, so reference data is not logged) |
+| `V005__patient_session_families.sql` | Patient refresh tokens: one row per token with a session family, single-use rotation and revocation (decision D31) |
 
 The partner DB holds **no catalog master data** (sex, document types, specialties, medications, allergies,
 forms, routes, frequencies, insurances): it lives in the catalog DB and is referenced by `…Code` columns,
